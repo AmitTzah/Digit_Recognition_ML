@@ -58,14 +58,13 @@ def cross_entropy_loss(W, X, t):
 
 def init_weights():
 
-    #first check if we have a best_weights.npy file already set up with good weights
+    # first check if we have a best_weights.npy file already set up with good weights
     try:
         W = np.load('best_weights.npy')
         print("Best weights found. Loading from file.")
         return W
     except FileNotFoundError:
         print("Best weights not found. Initializing random weights.")
-
 
     # Initialize 10 random vectors W_0, W_1, ..., W_9 with a length of 785
     # these are the weights for each of the 10 classes
@@ -94,7 +93,7 @@ def gradient_descent(W, X, t, learning_rate, num_iterations):
         sample_error = softmax_matrix - t
 
         # Calculate the weight update step
-        grad = np.dot(sample_error.T, X) / num_samples
+        grad = np.dot(sample_error.T, X)
         W = W - learning_rate * grad
 
         # Print the loss every 10 iterations
@@ -123,7 +122,7 @@ def main():
     W = init_weights()
 
     # Set the learning rate
-    learning_rate = 0.1
+    learning_rate = 0.00005
 
     # Set the number of iterations
     num_iterations = 300
@@ -131,7 +130,7 @@ def main():
     # Train the model
     W = gradient_descent(W, X_train, t_train, learning_rate, num_iterations)
 
-    #save the weights to disk
+    # save the weights to disk
     np.save('best_weights.npy', W)
 
 
