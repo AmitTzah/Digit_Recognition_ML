@@ -79,27 +79,67 @@ def init_weights():
     return W
 
 
-def gradient_descent(W, X, t, learning_rate, num_iterations):
+def calculate_accuracy(W, X, t):
+
+    # get the softmax matrix
+    dot_products_matrix = np.dot(X, W.T)
+    exp_dot_products_matrix = np.exp(dot_products_matrix)
+
+    softmax_matrix = exp_dot_products_matrix / \
+        np.sum(exp_dot_products_matrix, axis=1, keepdims=True)
+
+    # The predicted class is the class with the highest probability
+    # For each row, find the index of the highest probability
+    predicted_classes = np.argmax(softmax_matrix, axis=1)
+
+    # The true class is the class with the value 1 in the t vector
+    # We can find the true class by finding the index of the value 1 in each row
+    true_classes = np.argmax(t, axis=1)
+
+    # The accuracy is the percentage of correctly classified samples
+    accuracy = np.sum(predicted_classes == true_classes) / len(true_classes)
+
+    return accuracy
+
+
+def gradient_descent(W, X_train, t_train, X_val, t_val, learning_rate, num_iterations, early_stopping_patience):
     iterations = 0
-    num_samples = X.shape[0]
+    best_val_accuracy = 0
+    no_improvement_counter = 0
 
     while iterations < num_iterations:
-        dot_products_matrix = np.dot(X, W.T)
+        dot_products_matrix = np.dot(X_train, W.T)
         exp_dot_products_matrix = np.exp(dot_products_matrix)
 
         softmax_matrix = exp_dot_products_matrix / \
             np.sum(exp_dot_products_matrix, axis=1, keepdims=True)
 
-        sample_error = softmax_matrix - t
+        sample_error = softmax_matrix - t_train
 
-        # Calculate the weight update step
-        grad = np.dot(sample_error.T, X)
+        # Calculate the gradient and update the weights
+        grad = np.dot(sample_error.T, X_train)
         W = W - learning_rate * grad
 
         # Print the loss every 10 iterations
         if iterations % 10 == 0:
-            print("Iteration:", iterations, "Loss:",
-                  cross_entropy_loss(W, X, t))
+            train_loss = cross_entropy_loss(W, X_train, t_train)
+            val_loss = cross_entropy_loss(W, X_val, t_val)
+            val_accuracy = calculate_accuracy(W, X_val, t_val)
+
+            print("Iteration:", iterations, "Train Loss:", train_loss,
+                  "Val Loss:", val_loss, "Val Accuracy:", val_accuracy)
+
+            # Check for early stopping
+            # If the validation accuracy is better by 5% than the best validation accuracy so far, reset the counter
+            if val_accuracy > 1.05 * best_val_accuracy:
+                best_val_accuracy = val_accuracy
+                no_improvement_counter = 0
+            else:
+                no_improvement_counter += 1
+                if no_improvement_counter >= early_stopping_patience:
+                    print("validation accuracy did not improve by 5% for", 10 *
+                          early_stopping_patience, "iterations. Stopping early.")
+                    break
 
         iterations += 1
 
@@ -128,7 +168,8 @@ def main():
     num_iterations = 300
 
     # Train the model
-    W = gradient_descent(W, X_train, t_train, learning_rate, num_iterations)
+    W = gradient_descent(W, X_train, t_train, X_val, t_val,
+                         learning_rate, num_iterations, early_stopping_patience=10)
 
     # save the weights to disk
     np.save('best_weights.npy', W)
