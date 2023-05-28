@@ -19,7 +19,7 @@ X = X.reshape((X.shape[0], -1))
 # Add a column of ones for the bias term
 X = np.hstack((X, np.ones((X.shape[0], 1))))
 
-# Split the data into train, validation and test sets, with 60%, 20%, 20% of the data respectively
+# Split the data into train, validation, and test sets, with 60%, 20%, 20% of the data, respectively
 X_train_val, X_test, t_train_val, t_test = train_test_split(
     X, t, test_size=0.2, random_state=1)
 X_train, X_val, t_train, t_val = train_test_split(
@@ -30,6 +30,14 @@ scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_val = scaler.transform(X_val)
 X_test = scaler.transform(X_test)
+
+# Convert target variables to one-hot np arrays
+#t_train is a vector of size NumberOfSamplesx1, we want a matrix of size NumberOfSamplesx10, where each row is a one-hot vector
+#for example, if the digit of some sample is 7, then the corresponding row of t_train should be [0,0,0,0,0,0,0,1,0,0]
+t_train = np.eye(10)[t_train]
+t_val = np.eye(10)[t_val]
+t_test = np.eye(10)[t_test]
+
 
 # Save the preprocessed data to disk
 np.save('X_train.npy', X_train)
