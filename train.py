@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import numpy as np
 
 # Using multinomial logistic regression to classify the MNIST dataset
@@ -102,10 +103,33 @@ def calculate_accuracy(W, X, t):
     return accuracy
 
 
+def plot_loss_and_accuracy(train_losses, val_accuracies):
+
+    # Plot the results
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.plot(range(len(train_losses)), train_losses, label='Train Loss')
+    plt.xlabel('Iterations')
+    plt.ylabel('Loss')
+    plt.legend()
+
+    plt.subplot(1, 2, 2)
+    plt.plot(range(len(val_accuracies)), val_accuracies,
+             label='Validation Accuracy')
+    plt.xlabel('Iterations')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    plt.show()
+
+
 def gradient_descent(W, X_train, t_train, X_val, t_val, learning_rate, num_iterations, early_stopping_patience):
     iterations = 0
     best_val_accuracy = 0
     no_improvement_counter = 0
+
+    train_losses = []
+    val_accuracies = []
 
     while iterations < num_iterations:
         dot_products_matrix = np.dot(X_train, W.T)
@@ -120,12 +144,17 @@ def gradient_descent(W, X_train, t_train, X_val, t_val, learning_rate, num_itera
         grad = np.dot(sample_error.T, X_train)
         W = W - learning_rate * grad
 
-        # Print the loss every 10 iterations
-        if iterations % 10 == 0:
-            train_loss = cross_entropy_loss(W, X_train, t_train)
-            val_loss = cross_entropy_loss(W, X_val, t_val)
-            val_accuracy = calculate_accuracy(W, X_val, t_val)
+        # Calculate losses and accuracy
+        train_loss = cross_entropy_loss(W, X_train, t_train)
+        val_loss = cross_entropy_loss(W, X_val, t_val)
+        val_accuracy = calculate_accuracy(W, X_val, t_val)
 
+        # Append the values for plotting
+        train_losses.append(train_loss)
+        val_accuracies.append(val_accuracy)
+
+        # Print the loss and accuracy every 10 iterations
+        if iterations % 10 == 0:
             print("Iteration:", iterations, "Train Loss:", train_loss,
                   "Val Loss:", val_loss, "Val Accuracy:", val_accuracy)
 
@@ -142,6 +171,10 @@ def gradient_descent(W, X_train, t_train, X_val, t_val, learning_rate, num_itera
                     break
 
         iterations += 1
+
+    # Plot the results
+
+    plot_loss_and_accuracy(train_losses, val_accuracies)
 
     return W
 
