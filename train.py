@@ -51,12 +51,22 @@ def cross_entropy_loss(W, X, t):
     softmax_matrix = exp_dot_products_matrix / \
         np.sum(exp_dot_products_matrix, axis=1, keepdims=True)
 
-    #We use matrix multiplications because it is a lot faster than using double for loops
+    # We use matrix multiplications because it is a lot faster than using double for loops
     loss = -np.sum(t * np.log(softmax_matrix))
     return loss
 
 
 def init_weights():
+
+    #first check if we have a best_weights.npy file already set up with good weights
+    try:
+        W = np.load('best_weights.npy')
+        print("Best weights found. Loading from file.")
+        return W
+    except FileNotFoundError:
+        print("Best weights not found. Initializing random weights.")
+
+
     # Initialize 10 random vectors W_0, W_1, ..., W_9 with a length of 785
     # these are the weights for each of the 10 classes
     num_vectors = 10
@@ -66,6 +76,33 @@ def init_weights():
     # To avoid possible overflow, we initialize the weights to be small
 
     W = np.random.rand(num_vectors, vector_length) * 0.0001
+
+    return W
+
+
+def gradient_descent(W, X, t, learning_rate, num_iterations):
+    iterations = 0
+    num_samples = X.shape[0]
+
+    while iterations < num_iterations:
+        dot_products_matrix = np.dot(X, W.T)
+        exp_dot_products_matrix = np.exp(dot_products_matrix)
+
+        softmax_matrix = exp_dot_products_matrix / \
+            np.sum(exp_dot_products_matrix, axis=1, keepdims=True)
+
+        sample_error = softmax_matrix - t
+
+        # Calculate the weight update step
+        grad = np.dot(sample_error.T, X) / num_samples
+        W = W - learning_rate * grad
+
+        # Print the loss every 10 iterations
+        if iterations % 10 == 0:
+            print("Iteration:", iterations, "Loss:",
+                  cross_entropy_loss(W, X, t))
+
+        iterations += 1
 
     return W
 
@@ -85,7 +122,17 @@ def main():
     # Initialize the weights
     W = init_weights()
 
-    cross_entropy_loss(W, X_train, t_train)
+    # Set the learning rate
+    learning_rate = 0.1
+
+    # Set the number of iterations
+    num_iterations = 300
+
+    # Train the model
+    W = gradient_descent(W, X_train, t_train, learning_rate, num_iterations)
+
+    #save the weights to disk
+    np.save('best_weights.npy', W)
 
 
 if __name__ == '__main__':
