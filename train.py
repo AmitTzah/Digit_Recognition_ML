@@ -41,25 +41,19 @@ def softmax(dot_products_matrix, n, k):
     return numerator / denominator
 
 
-# define the cross entropy loss function
 def cross_entropy_loss(W, X, t):
-    # W is a matrix of size 10x785
-    # X is a matrix of size NumberOfSamplesx785
-    # t is a matrix of size NumberOfSamplesx10
-
-    # get the number of samples
-    NumberOfSamples = X.shape[0]
-
-    # for computing the softmax function
     dot_products_matrix = np.dot(X, W.T)
+    exp_dot_products_matrix = np.exp(dot_products_matrix)
 
-    # sum over all the samples and all the classes
-    sum = 0
-    for n in range(NumberOfSamples):
-        for k in range(10):
-            sum += t[n][k] * np.log(softmax(dot_products_matrix, n, k))
+    # divide each element of the matrix by the sum of the elements in the row
+    # this way, softmax_matrix[n][k] will be the probability of sample n being in class k
+    # For testing purposes, we can check that softmax_matrix[n][k] is equal to softmax(dot_products_matrix, n, k)
+    softmax_matrix = exp_dot_products_matrix / \
+        np.sum(exp_dot_products_matrix, axis=1, keepdims=True)
 
-    return -sum
+    #We use matrix multiplications because it is a lot faster than using double for loops
+    loss = -np.sum(t * np.log(softmax_matrix))
+    return loss
 
 
 def init_weights():
