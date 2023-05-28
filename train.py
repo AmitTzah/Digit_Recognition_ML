@@ -11,12 +11,15 @@ def load_data():
         X_test = np.load('X_test.npy')
         t_train = np.load('t_train.npy')
         t_test = np.load('t_test.npy')
+        t_val = np.load('t_val.npy')
+        X_val = np.load('X_val.npy')
+
         print("Preprocessed data found. Loading from files.")
 
-        return X_train, X_test, t_train, t_test
+        return X_train, X_test, t_train, t_test, X_val, t_val
 
     except FileNotFoundError:
-        print("Preprocessed data not found. run mnist.py first.")
+        print("Preprocessed data not found, run mnist.py first.")
 
 
 # compute y_n_k, the softmax function, the probability of each class
@@ -80,7 +83,10 @@ def main():
 
     if data is not None:
 
-        X_train, X_test, t_train, t_test = data
+        X_train, X_test, t_train, t_test, X_val, t_val = data
+
+    else:
+        return
 
     # Initialize the weights
     W = init_weights()
