@@ -1,6 +1,7 @@
 import numpy as np
 
-#Using multinomial logistic regression to classify the MNIST dataset
+# Using multinomial logistic regression to classify the MNIST dataset
+
 
 def load_data():
 
@@ -35,8 +36,6 @@ def softmax(dot_products_matrix, n, k):
     denominator = np.sum(exp_dot_products_matrix[n])
 
     return numerator / denominator
-  
-    
 
 
 # define the cross entropy loss function
@@ -44,23 +43,20 @@ def cross_entropy_loss(W, X, t):
     # W is a matrix of size 10x785
     # X is a matrix of size NumberOfSamplesx785
     # t is a matrix of size NumberOfSamplesx10
-    # lam is a scalar value
-    
-    #get the number of samples
+
+    # get the number of samples
     NumberOfSamples = X.shape[0]
 
-    #for computing the softmax function
+    # for computing the softmax function
     dot_products_matrix = np.dot(X, W.T)
 
-
-    #sum over all the samples and all the classes
+    # sum over all the samples and all the classes
     sum = 0
     for n in range(NumberOfSamples):
         for k in range(10):
             sum += t[n][k] * np.log(softmax(dot_products_matrix, n, k))
-        
-    return -sum 
-   
+
+    return -sum
 
 
 def init_weights():
@@ -69,7 +65,10 @@ def init_weights():
     num_vectors = 10
     vector_length = 785
 
-    W = np.random.randn(num_vectors, vector_length)
+    # initialize a matrix of size 10x785 with random values
+    # To avoid possible overflow, we initialize the weights to be small
+
+    W = np.random.rand(num_vectors, vector_length) * 0.0001
 
     return W
 
