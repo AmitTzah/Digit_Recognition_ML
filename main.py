@@ -120,7 +120,11 @@ def plot_loss_and_accuracy(train_losses, val_accuracies):
     plt.ylabel('Accuracy')
     plt.legend()
 
-    plt.show()
+    # Save the plot as a PNG file
+    plt.savefig('plot.png')
+
+    # Close the plot to free resources
+    plt.close()
 
 
 def gradient_descent(W, X_train, t_train, X_val, t_val, learning_rate, num_iterations, early_stopping_patience):
@@ -140,10 +144,6 @@ def gradient_descent(W, X_train, t_train, X_val, t_val, learning_rate, num_itera
 
         sample_error = softmax_matrix - t_train
 
-        # Calculate the gradient and update the weights
-        grad = np.dot(sample_error.T, X_train)
-        W = W - learning_rate * grad
-
         # Calculate losses and accuracy
         train_loss = cross_entropy_loss(W, X_train, t_train)
         val_loss = cross_entropy_loss(W, X_val, t_val)
@@ -152,6 +152,10 @@ def gradient_descent(W, X_train, t_train, X_val, t_val, learning_rate, num_itera
         # Append the values for plotting
         train_losses.append(train_loss)
         val_accuracies.append(val_accuracy)
+
+        # Calculate the gradient and update the weights
+        grad = np.dot(sample_error.T, X_train)
+        W = W - learning_rate * grad
 
         # Print the loss and accuracy every 10 iterations
         if iterations % 10 == 0:
@@ -194,11 +198,14 @@ def main():
     # Initialize the weights
     W = init_weights()
 
+    # check accuracy before training
+    print("Accuracy before training:", calculate_accuracy(W, X_train, t_train))
+
     # Set the learning rate
-    learning_rate = 0.00005
+    learning_rate = 0.000001
 
     # Set the number of iterations
-    num_iterations = 2000
+    num_iterations = 100
 
     # Train the model
     W = gradient_descent(W, X_train, t_train, X_val, t_val,

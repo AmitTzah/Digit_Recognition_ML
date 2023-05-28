@@ -5,3 +5,4 @@ x_train.npy
 t_val.npy
 X_val.npy
 best_weights.npy
+plot.png
