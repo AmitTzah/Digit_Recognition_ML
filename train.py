@@ -198,14 +198,22 @@ def main():
     learning_rate = 0.00005
 
     # Set the number of iterations
-    num_iterations = 300
+    num_iterations = 2000
 
     # Train the model
     W = gradient_descent(W, X_train, t_train, X_val, t_val,
                          learning_rate, num_iterations, early_stopping_patience=10)
 
+    print("finished training, saving best weights to file for later use")
+
     # save the weights to disk
     np.save('best_weights.npy', W)
+
+    # Calculate the accuracy on the test set, valid set and train set
+    print("Final accuracies:")
+    print("Train accuracy:", calculate_accuracy(W, X_train, t_train))
+    print("Validation accuracy:", calculate_accuracy(W, X_val, t_val))
+    print("Test accuracy:", calculate_accuracy(W, X_test, t_test))
 
 
 if __name__ == '__main__':
